@@ -5,7 +5,7 @@ class CrackTheCodeGame {
         this.computerGame = {
             secretCode: '',
             attempts: 0,
-            maxAttempts: 10,
+            maxAttempts: 5,
             gameOver: false
         };
         this.multiplayerGame = {
@@ -15,7 +15,7 @@ class CrackTheCodeGame {
             yourCode: '',
             yourAttempts: 0,
             opponentAttempts: 0,
-            maxAttempts: 10,
+            maxAttempts: 5,
             isYourTurn: false,
             gameOver: false,
             gameStarted: false,
@@ -166,7 +166,7 @@ class CrackTheCodeGame {
         this.computerGame = {
             secretCode: this.generateSecretCode(),
             attempts: 0,
-            maxAttempts: 10,
+            maxAttempts: 5,
             gameOver: false
         };
         

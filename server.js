@@ -27,7 +27,7 @@ class GameRoom {
         this.guestCode = null;
         this.hostAttempts = 0;
         this.guestAttempts = 0;
-        this.maxAttempts = 10;
+        this.maxAttempts = 5;
         this.currentTurn = 'host'; // 'host' or 'guest'
         this.gameStarted = false;
         this.gameEnded = false;

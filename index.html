@@ -21,6 +21,18 @@
                 <button id="play-computer" class="menu-btn">🤖 Play vs Computer</button>
                 <button id="play-friend" class="menu-btn">👥 Play with Friend</button>
             </div>
+            <div class="instructions-container">
+                <div class="instructions">
+                    <h3>How to Play:</h3>
+                    <ol class="instruction-list">
+                        <li>🎯 <strong>Guess the secret 4-digit code</strong> (digits 0-9, can repeat)</li>
+                        <li><span class="color-dot green"></span> <strong>Green</strong> = Correct digit in correct position</li>
+                        <li><span class="color-dot orange"></span> <strong>Orange</strong> = Digit exists but wrong position</li>
+                        <li><span class="color-dot red"></span> <strong>Red</strong> = Digit not in the secret code</li>
+                        <li>⏰ <strong>You have 5 attempts</strong> to crack the code!</li>
+                    </ol>
+                </div>
+            </div>
         </div>
 
         <!-- Computer Game Screen -->
@@ -28,7 +40,7 @@
             <div class="game-header">
                 <button id="back-to-menu" class="back-btn">← Back</button>
                 <div class="attempts-counter">
-                    <span>Attempts: <span id="attempts-used">0</span>/10</span>
+                    <span>Attempts: <span id="attempts-used">0</span>/5</span>
                 </div>
             </div>
 
@@ -120,7 +132,7 @@
                     <div class="player-panel">
                         <h3>You</h3>
                         <div class="attempts-counter">
-                            Attempts: <span id="your-attempts">0</span>/10
+                            Attempts: <span id="your-attempts">0</span>/5
                         </div>
                         <div id="your-guesses" class="guesses-list"></div>
                     </div>
@@ -128,7 +140,7 @@
                     <div class="player-panel">
                         <h3>Opponent</h3>
                         <div class="attempts-counter">
-                            Attempts: <span id="opponent-attempts">0</span>/10
+                            Attempts: <span id="opponent-attempts">0</span>/5
                         </div>
                         <div id="opponent-guesses" class="guesses-list"></div>
                     </div>
@@ -144,6 +156,8 @@
             </div>
         </div>
     </div>
+
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>

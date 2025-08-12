@@ -222,7 +222,7 @@ graph TB
 ### Manual Testing Scenarios
 1. **Single Player Mode**:
    - Complete game with win condition
-   - Complete game with loss condition (10 attempts)
+   - Complete game with loss condition (5 attempts)
    - Test feedback accuracy for various guesses
 
 2. **Multiplayer Mode**:

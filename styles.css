@@ -47,6 +47,55 @@ header p {
     opacity: 0.9;
 }
 
+/* Instructions Container */
+.instructions-container {
+
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.instructions {
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    border-left: 4px solid #4facfe;
+    border-right: 4px solid #4facfe;
+    border-bottom: 4px solid #4facfe;
+    border-top: 4px solid #4facfe;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+
+.instructions h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+
+.instruction-list {
+    list-style: none;
+    padding: 0;
+}
+
+.instruction-list li {
+    padding: 8px 0;
+    font-size: 1rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.instruction-list li .color-dot {
+    margin-right: 4px;
+}
+
+.instruction-list li strong {
+    color: #333;
+}
+
 .screen {
     display: none;
     padding: 30px;
@@ -119,7 +168,11 @@ header p {
     flex-wrap: wrap;
 }
 
-#guess-input, #multiplayer-guess-input, #host-secret-code, #guest-secret-code, #join-room-code {
+#guess-input,
+#multiplayer-guess-input,
+#host-secret-code,
+#guest-secret-code,
+#join-room-code {
     flex: 1;
     padding: 15px;
     border: 2px solid #e9ecef;
@@ -130,13 +183,18 @@ header p {
     min-width: 200px;
 }
 
-#guess-input:focus, #multiplayer-guess-input:focus, #host-secret-code:focus, #guest-secret-code:focus, #join-room-code:focus {
+#guess-input:focus,
+#multiplayer-guess-input:focus,
+#host-secret-code:focus,
+#guest-secret-code:focus,
+#join-room-code:focus {
     outline: none;
     border-color: #4facfe;
     box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
 }
 
-.submit-btn, .action-btn {
+.submit-btn,
+.action-btn {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     color: white;
     border: none;
@@ -147,7 +205,8 @@ header p {
     transition: transform 0.2s;
 }
 
-.submit-btn:hover, .action-btn:hover {
+.submit-btn:hover,
+.action-btn:hover {
     transform: translateY(-1px);
 }
 
@@ -328,34 +387,34 @@ header p {
         margin: 10px;
         border-radius: 15px;
     }
-    
+
     header h1 {
         font-size: 2rem;
     }
-    
+
     .screen {
         padding: 20px;
     }
-    
+
     .input-section {
         flex-direction: column;
     }
-    
+
     .players-section {
         grid-template-columns: 1fr;
     }
-    
+
     .game-header {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .guess-row {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
     }
-    
+
     .guess-digits {
         align-self: center;
     }
@@ -365,22 +424,85 @@ header p {
     body {
         padding: 10px;
     }
-    
+
     header {
         padding: 20px 15px;
     }
-    
+
     header h1 {
         font-size: 1.8rem;
     }
-    
+
     .screen {
         padding: 15px;
     }
-    
+
     .digit {
         width: 35px;
         height: 35px;
         font-size: 1rem;
     }
+}
+
+/* Fo
+oter Instructions */
+.game-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    padding: 20px;
+    text-align: center;
+    margin-top: auto;
+}
+
+.footer-instructions h4 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.color-guide {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.color-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.color-dot.green {
+    background-color: #28a745;
+}
+
+.color-dot.orange {
+    background-color: #fd7e14;
+}
+
+.color-dot.red {
+    background-color: #dc3545;
+}
+
+/* Make sure footer stays at bottom */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }

@@ -59,7 +59,7 @@ npm run dev
 
 - Codes are exactly 4 digits (0-9)
 - Digits can repeat
-- Maximum 10 attempts per player
+- Maximum 5 attempts per player
 - 🟩 Green = Correct digit in correct position
 - 🟨 Yellow = Digit exists but wrong position  
 - 🟥 Red = Digit doesn't exist in the code

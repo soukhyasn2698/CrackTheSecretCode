@@ -80,5 +80,5 @@ Crack the Code is a real-time multiplayer code-cracking game where players compe
 
 1. WHEN setting a secret code THEN the system SHALL require exactly 4 digits (0-9)
 2. WHEN making a guess THEN the system SHALL require exactly 4 digits
-3. WHEN a player reaches 10 attempts THEN the system SHALL end the game
+3. WHEN a player reaches 5 attempts THEN the system SHALL end the game
 4. WHEN digits repeat in codes or guesses THEN the system SHALL handle them correctly in feedback calculation
