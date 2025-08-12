@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crack the Code</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Crack the Code</h1>
+            <p>Guess the 4-digit secret code!</p>
+        </header>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-buttons">
+                <button id="play-computer" class="menu-btn">🤖 Play vs Computer</button>
+                <button id="play-friend" class="menu-btn">👥 Play with Friend</button>
+            </div>
+        </div>
+
+        <!-- Computer Game Screen -->
+        <div id="computer-game" class="screen">
+            <div class="game-header">
+                <button id="back-to-menu" class="back-btn">← Back</button>
+                <div class="attempts-counter">
+                    <span>Attempts: <span id="attempts-used">0</span>/10</span>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div class="input-section">
+                    <input type="text" id="guess-input" maxlength="4" placeholder="Enter 4 digits">
+                    <button id="submit-guess" class="submit-btn">Submit Guess</button>
+                </div>
+
+                <div id="feedback-area" class="feedback-area"></div>
+
+                <div id="game-result" class="game-result hidden"></div>
+
+                <button id="new-game" class="action-btn hidden">New Game</button>
+            </div>
+        </div>
+
+        <!-- Multiplayer Menu -->
+        <div id="multiplayer-menu" class="screen">
+            <div class="game-header">
+                <button id="back-to-main" class="back-btn">← Back</button>
+                <h2>Multiplayer Mode</h2>
+            </div>
+
+            <div class="multiplayer-options">
+                <button id="create-room" class="menu-btn">Create Room</button>
+                <button id="join-room" class="menu-btn">Join Room</button>
+            </div>
+        </div>
+
+        <!-- Create Room Screen -->
+        <div id="create-room-screen" class="screen">
+            <div class="game-header">
+                <button id="back-to-multiplayer" class="back-btn">← Back</button>
+                <h2>Create Room</h2>
+            </div>
+
+            <div class="room-setup">
+                <div class="room-code-display">
+                    <p>Room Code:</p>
+                    <div id="room-code" class="room-code"></div>
+                    <button id="copy-room-code" class="copy-btn">Copy Code</button>
+                </div>
+
+                <div class="code-input-section">
+                    <p>Set your secret code:</p>
+                    <input type="text" id="host-secret-code" maxlength="4" placeholder="Enter 4 digits">
+                    <button id="confirm-host-code" class="submit-btn">Confirm Code</button>
+                </div>
+
+                <div id="waiting-for-player" class="waiting-message hidden">
+                    <p>Waiting for another player to join...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Join Room Screen -->
+        <div id="join-room-screen" class="screen">
+            <div class="game-header">
+                <button id="back-to-multiplayer-2" class="back-btn">← Back</button>
+                <h2>Join Room</h2>
+            </div>
+
+            <div class="join-setup">
+                <div class="room-code-input">
+                    <input type="text" id="join-room-code" placeholder="Enter room code">
+                    <button id="join-game" class="submit-btn">Join Game</button>
+                </div>
+
+                <div id="join-code-section" class="code-input-section hidden">
+                    <p>Set your secret code:</p>
+                    <input type="text" id="guest-secret-code" maxlength="4" placeholder="Enter 4 digits">
+                    <button id="confirm-guest-code" class="submit-btn">Confirm Code</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multiplayer Game Screen -->
+        <div id="multiplayer-game" class="screen">
+            <div class="game-header">
+                <button id="leave-game" class="back-btn">← Leave Game</button>
+                <div class="turn-indicator">
+                    <span id="turn-status">Your Turn</span>
+                </div>
+            </div>
+
+            <div class="multiplayer-game-area">
+                <div class="players-section">
+                    <div class="player-panel">
+                        <h3>You</h3>
+                        <div class="attempts-counter">
+                            Attempts: <span id="your-attempts">0</span>/10
+                        </div>
+                        <div id="your-guesses" class="guesses-list"></div>
+                    </div>
+
+                    <div class="player-panel">
+                        <h3>Opponent</h3>
+                        <div class="attempts-counter">
+                            Attempts: <span id="opponent-attempts">0</span>/10
+                        </div>
+                        <div id="opponent-guesses" class="guesses-list"></div>
+                    </div>
+                </div>
+
+                <div class="input-section">
+                    <input type="text" id="multiplayer-guess-input" maxlength="4" placeholder="Enter 4 digits">
+                    <button id="submit-multiplayer-guess" class="submit-btn">Submit Guess</button>
+                </div>
+
+                <div id="multiplayer-result" class="game-result hidden"></div>
+                <button id="new-multiplayer-game" class="action-btn hidden">New Game</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
