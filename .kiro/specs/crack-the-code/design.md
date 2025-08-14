@@ -111,9 +111,9 @@ graph TB
   guestSocketId: String,      // Socket ID of joining player
   hostCode: String,           // Host's 4-digit secret code
   guestCode: String,          // Guest's 4-digit secret code
-  hostAttempts: Number,       // Host's attempt count (0-10)
-  guestAttempts: Number,      // Guest's attempt count (0-10)
-  maxAttempts: Number,        // Maximum attempts allowed (10)
+  hostAttempts: Number,       // Host's attempt count (0-7)
+  guestAttempts: Number,      // Guest's attempt count (0-7)
+  maxAttempts: Number,        // Maximum attempts allowed (7)
   currentTurn: String,        // 'host' or 'guest'
   gameStarted: Boolean,       // Game initialization flag
   gameEnded: Boolean,         // Game completion flag
@@ -127,7 +127,7 @@ graph TB
 {
   guess: String,              // 4-digit guess
   feedback: Array,            // ['correct', 'wrong-position', 'not-in-code']
-  attempt: Number             // Attempt number (1-10)
+  attempt: Number             // Attempt number (1-7)
 }
 ```
 
@@ -137,7 +137,7 @@ graph TB
 {
   secretCode: String,         // Generated 4-digit code
   attempts: Number,           // Current attempt count
-  maxAttempts: Number,        // Maximum attempts (10)
+  maxAttempts: Number,        // Maximum attempts (7)
   gameOver: Boolean           // Game completion flag
 }
 
@@ -149,7 +149,7 @@ graph TB
   yourCode: String,           // Player's secret code
   yourAttempts: Number,       // Player's attempt count
   opponentAttempts: Number,   // Opponent's attempt count
-  maxAttempts: Number,        // Maximum attempts (10)
+  maxAttempts: Number,        // Maximum attempts (7)
   isYourTurn: Boolean,        // Turn indicator
   gameOver: Boolean,          // Game completion flag
   gameStarted: Boolean,       // Game initialization flag
@@ -222,7 +222,7 @@ graph TB
 ### Manual Testing Scenarios
 1. **Single Player Mode**:
    - Complete game with win condition
-   - Complete game with loss condition (5 attempts)
+   - Complete game with loss condition (7 attempts)
    - Test feedback accuracy for various guesses
 
 2. **Multiplayer Mode**:

@@ -14,7 +14,7 @@ Crack the Code is a real-time multiplayer code-cracking game where players compe
 
 1. WHEN a player selects single-player mode THEN the system SHALL generate a random 4-digit secret code
 2. WHEN a player makes a guess THEN the system SHALL provide color-coded feedback (green for correct position, yellow for wrong position, red for not in code)
-3. WHEN a player makes 10 incorrect guesses THEN the system SHALL end the game and reveal the secret code
+3. WHEN a player makes 7 incorrect guesses THEN the system SHALL end the game and reveal the secret code
 4. WHEN a player correctly guesses the code THEN the system SHALL display a victory message
 
 ### Requirement 2
@@ -80,5 +80,5 @@ Crack the Code is a real-time multiplayer code-cracking game where players compe
 
 1. WHEN setting a secret code THEN the system SHALL require exactly 4 digits (0-9)
 2. WHEN making a guess THEN the system SHALL require exactly 4 digits
-3. WHEN a player reaches 5 attempts THEN the system SHALL end the game
+3. WHEN a player reaches 7 attempts THEN the system SHALL end the game
 4. WHEN digits repeat in codes or guesses THEN the system SHALL handle them correctly in feedback calculation
