@@ -96,7 +96,7 @@ class CrackTheCodeGame {
         document.getElementById('multiplayer-guess-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.submitMultiplayerGuess();
         });
-        document.getElementById('new-multiplayer-game').addEventListener('click', () => this.showScreen('multiplayer-menu'));
+        document.getElementById('new-multiplayer-game').addEventListener('click', () => this.resetMultiplayerGame());
         
         // Input validation
         this.setupInputValidation();
@@ -335,6 +335,16 @@ class CrackTheCodeGame {
         
         this.socket.on('room-error', (data) => {
             alert(data.message);
+            
+            // Handle different types of errors
+            if (data.message.includes('already exists')) {
+                // Room code collision - generate a new one and try again
+                this.createRoom();
+            } else {
+                // Other errors - reset UI state
+                document.getElementById('join-code-section').classList.add('hidden');
+                document.getElementById('waiting-for-player').classList.add('hidden');
+            }
         });
         
         this.socket.on('game-start', (data) => {
@@ -375,7 +385,8 @@ class CrackTheCodeGame {
             } else if (data.winner === 'draw') {
                 message = `🤝 It's a draw! Both players used all attempts. Your code was ${this.multiplayerGame.yourCode}, opponent's was ${this.multiplayerGame.playerRole === 'host' ? data.guestCode : data.hostCode}.`;
             } else {
-                message = `😞 Your opponent won! They cracked your code in ${this.multiplayerGame.opponentAttempts} attempts.`;
+                const opponentCode = this.multiplayerGame.playerRole === 'host' ? data.guestCode : data.hostCode;
+                message = `😞 Your opponent won! They cracked your code in ${this.multiplayerGame.opponentAttempts} attempts. The code you were trying to crack was ${opponentCode}.`;
             }
             
             this.endMultiplayerGame(message);
@@ -493,8 +504,15 @@ class CrackTheCodeGame {
         this.multiplayerGame.yourGuesses = [];
         this.multiplayerGame.opponentGuesses = [];
         
-        // Join room on server
-        this.socket.emit('join-room', { roomCode });
+        // Check if socket is available and connected
+        if (this.socket && this.socket.connected) {
+            // Join room on server
+            this.socket.emit('join-room', { roomCode });
+        } else {
+            console.log('No server connection - offline demo mode');
+            // In offline mode, simulate successful room join
+            alert('⚠️ Demo Mode: Joined room ' + roomCode + '!\nEnter your secret code below to continue.');
+        }
         
         document.getElementById('join-code-section').classList.remove('hidden');
     }
@@ -687,7 +705,7 @@ class CrackTheCodeGame {
         document.getElementById('opponent-attempts').textContent = this.multiplayerGame.opponentAttempts;
         
         if (this.isCorrectGuess(feedback)) {
-            this.endMultiplayerGame(`😞 Your opponent won! They cracked your code in ${this.multiplayerGame.opponentAttempts} attempts.`);
+            this.endMultiplayerGame(`😞 Your opponent won! They cracked your code in ${this.multiplayerGame.opponentAttempts} attempts. The code you were trying to crack was ${this.multiplayerGame.opponentCode}.`);
             return;
         } else if (this.multiplayerGame.opponentAttempts >= this.multiplayerGame.maxAttempts) {
             if (this.multiplayerGame.yourAttempts >= this.multiplayerGame.maxAttempts) {
@@ -718,6 +736,63 @@ class CrackTheCodeGame {
         
         resultDiv.textContent = message;
         document.getElementById('new-multiplayer-game').classList.remove('hidden');
+    }
+
+    resetMultiplayerGame() {
+        // Disconnect from current room if connected
+        if (this.socket && this.socket.connected && this.multiplayerGame.roomCode) {
+            this.socket.emit('leave-room', { roomCode: this.multiplayerGame.roomCode });
+        }
+
+        // Reset all multiplayer game state
+        this.multiplayerGame = {
+            roomCode: '',
+            isHost: false,
+            playerRole: '',
+            yourCode: '',
+            yourAttempts: 0,
+            opponentAttempts: 0,
+            maxAttempts: 7,
+            isYourTurn: false,
+            gameOver: false,
+            gameStarted: false,
+            yourGuesses: [],
+            opponentGuesses: []
+        };
+
+        // Clear all input fields
+        const roomCodeInput = document.getElementById('join-room-code');
+        if (roomCodeInput) roomCodeInput.value = '';
+        
+        const hostCodeInput = document.getElementById('host-secret-code');
+        if (hostCodeInput) hostCodeInput.value = '';
+        
+        const guestCodeInput = document.getElementById('guest-secret-code');
+        if (guestCodeInput) guestCodeInput.value = '';
+        
+        const multiplayerGuessInput = document.getElementById('multiplayer-guess-input');
+        if (multiplayerGuessInput) {
+            multiplayerGuessInput.value = '';
+            multiplayerGuessInput.disabled = false;
+        }
+
+        // Reset UI elements
+        document.getElementById('join-code-section').classList.add('hidden');
+        document.getElementById('waiting-for-player').classList.add('hidden');
+        document.getElementById('multiplayer-result').classList.add('hidden');
+        document.getElementById('new-multiplayer-game').classList.add('hidden');
+        
+        const submitBtn = document.getElementById('submit-multiplayer-guess');
+        if (submitBtn) submitBtn.disabled = false;
+
+        // Clear guess displays
+        document.getElementById('your-guesses').innerHTML = '';
+        document.getElementById('opponent-guesses').innerHTML = '';
+        document.getElementById('your-attempts').textContent = '0';
+        document.getElementById('opponent-attempts').textContent = '0';
+
+        // Go back to multiplayer menu
+        this.showScreen('multiplayer-menu');
     }
 }
 

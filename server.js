@@ -105,6 +105,13 @@ io.on('connection', (socket) => {
 
     socket.on('create-room', (data) => {
         const roomCode = data.roomCode;
+        
+        // Check if room already exists
+        if (gameRooms.has(roomCode)) {
+            socket.emit('room-error', { message: 'Room code already exists. Please try again.' });
+            return;
+        }
+        
         const room = new GameRoom(roomCode, socket.id);
         gameRooms.set(roomCode, room);
         
@@ -119,6 +126,11 @@ io.on('connection', (socket) => {
         
         if (!room) {
             socket.emit('room-error', { message: 'Room not found' });
+            return;
+        }
+        
+        if (room.hostSocketId === socket.id) {
+            socket.emit('room-error', { message: 'You cannot join your own room' });
             return;
         }
         
@@ -235,6 +247,22 @@ io.on('connection', (socket) => {
                 hostAttempts: room.hostAttempts,
                 guestAttempts: room.guestAttempts
             });
+        }
+    });
+
+    socket.on('leave-room', (data) => {
+        const roomCode = data.roomCode;
+        const room = gameRooms.get(roomCode);
+        
+        if (room) {
+            console.log(`${socket.id} leaving room ${roomCode}`);
+            socket.leave(roomCode);
+            
+            // Notify the other player if they exist
+            socket.to(roomCode).emit('player-disconnected');
+            
+            // Clean up the room
+            gameRooms.delete(roomCode);
         }
     });
 

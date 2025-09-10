@@ -25,7 +25,6 @@ graph TB
 - **Real-time Communication**: Socket.IO for WebSocket connections
 - **Frontend**: Vanilla JavaScript, HTML5, CSS3
 - **State Management**: In-memory storage using JavaScript Maps
-- **Deployment**: Supports AWS Elastic Beanstalk with WebSocket configuration
 
 ## Components and Interfaces
 
