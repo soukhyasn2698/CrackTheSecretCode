@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px 20px; 
+                border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #45a049; }
+        .room-list { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Room Debug Tool</h1>
+    <p>Debug multiplayer room issues</p>
+
+    <div>
+        <button onclick="connectToServer()">🔌 Connect to Server</button>
+        <button onclick="listRooms()">📋 List Active Rooms</button>
+        <button onclick="createTestRoom()">➕ Create Test Room</button>
+        <div id="connection-status" class="status info">Not connected</div>
+    </div>
+
+    <div>
+        <h3>Join Room Test:</h3>
+        <input type="text" id="test-room-code" placeholder="Enter room code" maxlength="6">
+        <button onclick="testJoinRoom()">🚪 Test Join Room</button>
+    </div>
+
+    <div id="room-list" class="room-list">
+        <h3>Active Rooms:</h3>
+        <p>Click "List Active Rooms" to see current rooms</p>
+    </div>
+
+    <div id="debug-log" style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 20px; max-height: 300px; overflow-y: auto;">
+        <h3>Debug Log:</h3>
+        <div id="log-content"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = null;
+        
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('log-content');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function updateConnectionStatus(status, type = 'info') {
+            const statusDiv = document.getElementById('connection-status');
+            statusDiv.textContent = status;
+            statusDiv.className = `status ${type}`;
+        }
+
+        function connectToServer() {
+            try {
+                socket = io();
+                
+                socket.on('connect', () => {
+                    log('✅ Connected to server', 'success');
+                    updateConnectionStatus('Connected to server', 'success');
+                });
+
+                socket.on('disconnect', () => {
+                    log('❌ Disconnected from server', 'error');
+                    updateConnectionStatus('Disconnected from server', 'error');
+                });
+
+                socket.on('room-created', (data) => {
+                    log(`✅ Room created: ${data.roomCode}`, 'success');
+                });
+
+                socket.on('room-joined', (data) => {
+                    log(`✅ Successfully joined room: ${data.roomCode}`, 'success');
+                });
+
+                socket.on('room-error', (data) => {
+                    log(`❌ Room error: ${data.message}`, 'error');
+                });
+
+                socket.on('rooms-list', (rooms) => {
+                    log(`📋 Received rooms list: ${rooms.length} active rooms`, 'info');
+                    displayRooms(rooms);
+                });
+
+                socket.on('player-joined', () => {
+                    log('👥 Another player joined the room', 'info');
+                });
+
+                socket.on('player-disconnected', () => {
+                    log('👋 A player disconnected', 'info');
+                });
+
+            } catch (error) {
+                log(`❌ Connection error: ${error.message}`, 'error');
+                updateConnectionStatus('Connection failed', 'error');
+            }
+        }
+
+        function listRooms() {
+            if (socket && socket.connected) {
+                log('📋 Requesting room list...', 'info');
+                socket.emit('list-rooms');
+            } else {
+                log('❌ Not connected to server', 'error');
+            }
+        }
+
+        function createTestRoom() {
+            if (socket && socket.connected) {
+                const roomCode = generateRoomCode();
+                log(`➕ Creating test room: ${roomCode}`, 'info');
+                socket.emit('create-room', { roomCode });
+            } else {
+                log('❌ Not connected to server', 'error');
+            }
+        }
+
+        function testJoinRoom() {
+            const roomCode = document.getElementById('test-room-code').value.trim().toUpperCase();
+            if (!roomCode) {
+                log('❌ Please enter a room code', 'error');
+                return;
+            }
+
+            if (socket && socket.connected) {
+                log(`🚪 Attempting to join room: ${roomCode}`, 'info');
+                socket.emit('join-room', { roomCode });
+            } else {
+                log('❌ Not connected to server', 'error');
+            }
+        }
+
+        function displayRooms(rooms) {
+            const roomListDiv = document.getElementById('room-list');
+            if (rooms.length === 0) {
+                roomListDiv.innerHTML = '<h3>Active Rooms:</h3><p>No active rooms</p>';
+                return;
+            }
+
+            let html = '<h3>Active Rooms:</h3>';
+            rooms.forEach(room => {
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 4px;">
+                        <strong>Room: ${room.code}</strong><br>
+                        Host: ${room.host}<br>
+                        Guest: ${room.guest || 'None'}<br>
+                        Game Started: ${room.gameStarted ? 'Yes' : 'No'}
+                        <button onclick="testJoinSpecificRoom('${room.code}')" style="margin-left: 10px;">Join This Room</button>
+                    </div>
+                `;
+            });
+            roomListDiv.innerHTML = html;
+        }
+
+        function testJoinSpecificRoom(roomCode) {
+            document.getElementById('test-room-code').value = roomCode;
+            testJoinRoom();
+        }
+
+        function generateRoomCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            return Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
+
+        // Auto-connect on page load
+        window.addEventListener('load', () => {
+            setTimeout(connectToServer, 500);
+        });
+    </script>
+</body>
+</html>

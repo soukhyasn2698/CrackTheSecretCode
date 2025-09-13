@@ -104,10 +104,13 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     socket.on('create-room', (data) => {
-        const roomCode = data.roomCode;
+        const roomCode = data.roomCode.toUpperCase(); // Ensure uppercase
+        
+        console.log(`Attempting to create room: ${roomCode}`);
         
         // Check if room already exists
         if (gameRooms.has(roomCode)) {
+            console.log(`Room ${roomCode} already exists`);
             socket.emit('room-error', { message: 'Room code already exists. Please try again.' });
             return;
         }
@@ -117,24 +120,30 @@ io.on('connection', (socket) => {
         
         socket.join(roomCode);
         socket.emit('room-created', { roomCode });
-        console.log(`Room ${roomCode} created by ${socket.id}`);
+        console.log(`Room ${roomCode} created by ${socket.id}. Total rooms: ${gameRooms.size}`);
     });
 
     socket.on('join-room', (data) => {
-        const roomCode = data.roomCode;
+        const roomCode = data.roomCode.toUpperCase(); // Ensure uppercase
         const room = gameRooms.get(roomCode);
         
+        console.log(`${socket.id} attempting to join room: ${roomCode}`);
+        console.log(`Available rooms: ${Array.from(gameRooms.keys()).join(', ')}`);
+        
         if (!room) {
-            socket.emit('room-error', { message: 'Room not found' });
+            console.log(`Room ${roomCode} not found`);
+            socket.emit('room-error', { message: `Room ${roomCode} not found. Available rooms: ${gameRooms.size}` });
             return;
         }
         
         if (room.hostSocketId === socket.id) {
+            console.log(`${socket.id} tried to join their own room ${roomCode}`);
             socket.emit('room-error', { message: 'You cannot join your own room' });
             return;
         }
         
         if (room.guestSocketId) {
+            console.log(`Room ${roomCode} is full`);
             socket.emit('room-error', { message: 'Room is full' });
             return;
         }
@@ -146,7 +155,7 @@ io.on('connection', (socket) => {
         socket.emit('room-joined', { roomCode });
         socket.to(roomCode).emit('player-joined');
         
-        console.log(`${socket.id} joined room ${roomCode}`);
+        console.log(`${socket.id} successfully joined room ${roomCode}`);
     });
 
     socket.on('set-secret-code', (data) => {
@@ -219,6 +228,14 @@ io.on('connection', (socket) => {
                 hostCode: room.hostCode,
                 guestCode: room.guestCode
             });
+            
+            // Clean up room after game ends (with delay to allow message delivery)
+            setTimeout(() => {
+                if (gameRooms.has(roomCode)) {
+                    gameRooms.delete(roomCode);
+                    console.log(`Room ${roomCode} cleaned up after game end`);
+                }
+            }, 5000);
         } else if (playerAttempts >= room.maxAttempts) {
             if (opponentAttempts >= room.maxAttempts) {
                 // Both players exhausted attempts - draw
@@ -230,6 +247,14 @@ io.on('connection', (socket) => {
                     hostCode: room.hostCode,
                     guestCode: room.guestCode
                 });
+                
+                // Clean up room after draw (with delay to allow message delivery)
+                setTimeout(() => {
+                    if (gameRooms.has(roomCode)) {
+                        gameRooms.delete(roomCode);
+                        console.log(`Room ${roomCode} cleaned up after draw`);
+                    }
+                }, 5000);
             } else {
                 // Current player exhausted attempts, switch turn
                 room.switchTurn();
@@ -258,12 +283,46 @@ io.on('connection', (socket) => {
             console.log(`${socket.id} leaving room ${roomCode}`);
             socket.leave(roomCode);
             
-            // Notify the other player if they exist
-            socket.to(roomCode).emit('player-disconnected');
-            
-            // Clean up the room
-            gameRooms.delete(roomCode);
+            // Remove the player from the room instead of deleting the entire room
+            if (room.hostSocketId === socket.id) {
+                // If host leaves, either promote guest to host or delete room if no guest
+                if (room.guestSocketId) {
+                    // Promote guest to host
+                    room.hostSocketId = room.guestSocketId;
+                    room.guestSocketId = null;
+                    room.hostCode = room.guestCode;
+                    room.guestCode = '';
+                    room.hostAttempts = room.guestAttempts;
+                    room.guestAttempts = 0;
+                    console.log(`Guest promoted to host in room ${roomCode}`);
+                    // Notify the remaining player
+                    socket.to(roomCode).emit('player-disconnected');
+                } else {
+                    // No guest, safe to delete room
+                    gameRooms.delete(roomCode);
+                    console.log(`Room ${roomCode} deleted - no other players`);
+                }
+            } else if (room.guestSocketId === socket.id) {
+                // Guest leaves, just remove them
+                room.guestSocketId = null;
+                room.guestCode = '';
+                room.guestAttempts = 0;
+                console.log(`Guest left room ${roomCode}`);
+                // Notify the host
+                socket.to(roomCode).emit('player-disconnected');
+            }
         }
+    });
+
+    socket.on('list-rooms', () => {
+        const roomList = Array.from(gameRooms.entries()).map(([code, room]) => ({
+            code,
+            host: room.hostSocketId,
+            guest: room.guestSocketId,
+            gameStarted: room.gameStarted
+        }));
+        socket.emit('rooms-list', roomList);
+        console.log('Active rooms:', roomList);
     });
 
     socket.on('disconnect', () => {
@@ -275,6 +334,7 @@ io.on('connection', (socket) => {
                 // Notify the other player
                 socket.to(roomCode).emit('player-disconnected');
                 gameRooms.delete(roomCode);
+                console.log(`Room ${roomCode} deleted due to disconnect`);
                 break;
             }
         }

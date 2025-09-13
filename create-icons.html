@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Background gradient
+        const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+        gradient.addColorStop(0, '#16213e');
+        gradient.addColorStop(1, '#1a1a2e');
+        
+        // Draw background with rounded corners
+        ctx.fillStyle = gradient;
+        ctx.roundRect(0, 0, 512, 512, 80);
+        ctx.fill();
+        
+        // Draw lock
+        ctx.strokeStyle = '#4CAF50';
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        ctx.arc(256, 200, 60, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Lock body
+        ctx.fillStyle = '#4CAF50';
+        ctx.roundRect(196, 240, 120, 100, 10);
+        ctx.fill();
+        
+        // Keyhole
+        ctx.fillStyle = '#1a1a2e';
+        ctx.beginPath();
+        ctx.arc(256, 280, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(252, 288, 8, 20);
+        
+        // Code text
+        ctx.fillStyle = '#4CAF50';
+        ctx.font = 'bold 48px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('1234', 256, 400);
+        
+        // Title
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 24px Arial';
+        ctx.fillText('CRACK', 256, 460);
+        ctx.fillText('THE CODE', 256, 485);
+        
+        // Helper function for rounded rectangles
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>

@@ -31,7 +31,11 @@ class CrackTheCodeGame {
     initializeEventListeners() {
         // Main menu
         document.getElementById('play-computer').addEventListener('click', () => this.startComputerGame());
-        document.getElementById('play-friend').addEventListener('click', () => this.showScreen('multiplayer-menu'));
+        document.getElementById('play-friend').addEventListener('click', () => {
+            // Clear any previous multiplayer data when starting fresh
+            this.clearAllMultiplayerFields();
+            this.showScreen('multiplayer-menu');
+        });
         
         // Computer game
         document.getElementById('back-to-menu').addEventListener('click', () => this.showScreen('main-menu'));
@@ -56,7 +60,11 @@ class CrackTheCodeGame {
             console.error('Create room button not found!');
         }
         
-        document.getElementById('join-room').addEventListener('click', () => this.showScreen('join-room-screen'));
+        document.getElementById('join-room').addEventListener('click', () => {
+            // Clear previous room data when navigating to join room
+            this.clearJoinRoomFields();
+            this.showScreen('join-room-screen');
+        });
         
         // Create room
         document.getElementById('back-to-multiplayer').addEventListener('click', () => this.showScreen('multiplayer-menu'));
@@ -393,8 +401,17 @@ class CrackTheCodeGame {
         });
         
         this.socket.on('player-disconnected', () => {
-            alert('Your opponent has disconnected. Returning to main menu.');
-            this.showScreen('main-menu');
+            // Only show disconnect message if game is not already over
+            if (!this.multiplayerGame.gameOver) {
+                alert('Your opponent has disconnected. Returning to main menu.');
+                this.showScreen('main-menu');
+            } else {
+                console.log('Player disconnected after game ended - ignoring');
+            }
+        });
+
+        this.socket.on('rooms-list', (rooms) => {
+            console.log('Active rooms on server:', rooms);
         });
         
         this.socket.on('not-your-turn', () => {
@@ -507,7 +524,16 @@ class CrackTheCodeGame {
         // Check if socket is available and connected
         if (this.socket && this.socket.connected) {
             // Join room on server
+            console.log('Attempting to join room:', roomCode);
             this.socket.emit('join-room', { roomCode });
+            
+            // Add a timeout to detect if room join fails
+            setTimeout(() => {
+                if (!this.multiplayerGame.gameStarted && this.multiplayerGame.roomCode === roomCode) {
+                    console.log('Room join may have failed, checking room status...');
+                    this.socket.emit('list-rooms');
+                }
+            }, 3000);
         } else {
             console.log('No server connection - offline demo mode');
             // In offline mode, simulate successful room join
@@ -739,8 +765,9 @@ class CrackTheCodeGame {
     }
 
     resetMultiplayerGame() {
-        // Disconnect from current room if connected
-        if (this.socket && this.socket.connected && this.multiplayerGame.roomCode) {
+        // Only send leave-room if game is not already over (to avoid triggering disconnect messages)
+        if (this.socket && this.socket.connected && this.multiplayerGame.roomCode && !this.multiplayerGame.gameOver) {
+            console.log('Leaving room:', this.multiplayerGame.roomCode);
             this.socket.emit('leave-room', { roomCode: this.multiplayerGame.roomCode });
         }
 
@@ -794,6 +821,51 @@ class CrackTheCodeGame {
         // Go back to multiplayer menu
         this.showScreen('multiplayer-menu');
     }
+
+    // Clear all multiplayer fields
+    clearAllMultiplayerFields() {
+        // Clear join room fields
+        const roomCodeInput = document.getElementById('join-room-code');
+        const guestCodeInput = document.getElementById('guest-secret-code');
+        const hostCodeInput = document.getElementById('host-secret-code');
+        
+        if (roomCodeInput) roomCodeInput.value = '';
+        if (guestCodeInput) guestCodeInput.value = '';
+        if (hostCodeInput) hostCodeInput.value = '';
+        
+        // Hide sections
+        document.getElementById('join-code-section').classList.add('hidden');
+        document.getElementById('waiting-for-player').classList.add('hidden');
+        
+        console.log('Cleared all multiplayer fields');
+    }
+
+    // Clear join room fields
+    clearJoinRoomFields() {
+        const roomCodeInput = document.getElementById('join-room-code');
+        const guestCodeInput = document.getElementById('guest-secret-code');
+        
+        if (roomCodeInput) {
+            roomCodeInput.value = '';
+        }
+        if (guestCodeInput) {
+            guestCodeInput.value = '';
+        }
+        
+        // Hide the code section
+        document.getElementById('join-code-section').classList.add('hidden');
+        
+        console.log('Cleared join room fields');
+    }
+
+    // Debug function to list active rooms
+    debugListRooms() {
+        if (this.socket && this.socket.connected) {
+            this.socket.emit('list-rooms');
+        } else {
+            console.log('Not connected to server');
+        }
+    }
 }
 
 // Initialize the game when the page loads
@@ -810,6 +882,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (createRoomBtn) {
             console.log('Create room button event listeners:', createRoomBtn.onclick);
         }
+        
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+        
+        // PWA Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            
+            // Show install button or banner (optional)
+            console.log('PWA install prompt available');
+        });
+        
     } catch (error) {
         console.error('Error initializing game:', error);
     }
